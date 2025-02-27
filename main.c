@@ -43,6 +43,7 @@
 #include "cybsp.h"
 #include "cy_retarget_io.h"
 #include <inttypes.h>
+#include "mtb_hal.h"
 
 /*******************************************************************************
 * Macros
@@ -85,6 +86,10 @@ static const PpuAllAttributeType TEST_ATTRIBUTE =
     /*     {       ATT0,       ATT1,       ATT2,       ATT3, }*/
     .att = { 0x1F1F1F1F, 0x1F1F1F1F, 0x00000000, 0x00000000, },
 };
+
+/* For the Retarget -IO (Debug UART) usage */
+static cy_stc_scb_uart_context_t    UART_context;           /** UART context */
+static mtb_hal_uart_t               UART_hal_obj;           /** Debug UART HAL object  */
 
 /*******************************************************************************
 * Function Name: get_Target_Att
@@ -370,9 +375,27 @@ int main(void)
     __enable_irq();
 
     /* Initialize retarget-io to use the debug UART port */
-    Cy_SCB_UART_Init(UART_HW, &UART_config, NULL);
+    /* Debug UART init */
+    result = (cy_rslt_t)Cy_SCB_UART_Init(UART_HW, &UART_config, &UART_context);
+    if (result != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
+
     Cy_SCB_UART_Enable(UART_HW);
-    cy_retarget_io_init(UART_HW);
+
+    /* Setup the HAL UART */
+    result = mtb_hal_uart_setup(&UART_hal_obj, &UART_hal_config, &UART_context, NULL);
+    if (result != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
+
+    result = cy_retarget_io_init(&UART_hal_obj);
+    if (result != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
 
     /* Initialize the User LED */
     result = Cy_GPIO_Pin_Init(CYBSP_USER_LED_PORT, CYBSP_USER_LED_PIN, &CYBSP_USER_LED_config);
@@ -440,7 +463,7 @@ int main(void)
     }
     else
     {
-        printf("-->failure: unexpected result(0x%" PRIu32 ")\r\n", (uint32_t)faultSource);
+        printf("-->failure: unexpected result(0x%" PRIx32 ")\r\n", (uint32_t)faultSource);
         CY_ASSERT(0);
     }
 
@@ -470,7 +493,7 @@ int main(void)
     }
     else
     {
-        printf("-->failure: unexpected result(0x%" PRIu32 ")\r\n", (uint32_t)faultSource);
+        printf("-->failure: unexpected result(0x%" PRIx32 ")\r\n", (uint32_t)faultSource);
         CY_ASSERT(0);
     }
 
@@ -500,7 +523,7 @@ int main(void)
     }
     else
     {
-        printf("-->failure: unexpected result(0x%" PRIu32 ")\r\n", (uint32_t)faultSource);
+        printf("-->failure: unexpected result(0x%" PRIx32 ")\r\n", (uint32_t)faultSource);
         CY_ASSERT(0);
     }
 
