@@ -8,36 +8,33 @@
 *
 *
 *******************************************************************************
-* Copyright 2024-2025, Cypress Semiconductor Corporation (an Infineon company) or
-* an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
-*
-* This software, including source code, documentation and related
-* materials ("Software") is owned by Cypress Semiconductor Corporation
-* or one of its affiliates ("Cypress") and is protected by and subject to
-* worldwide patent protection (United States and foreign),
-* United States copyright laws and international treaty provisions.
-* Therefore, you may use this Software only as provided in the license
-* agreement accompanying the software package from which you
-* obtained this Software ("EULA").
-* If no EULA applies, Cypress hereby grants you a personal, non-exclusive,
-* non-transferable license to copy, modify, and compile the Software
-* source code solely for use in connection with Cypress's
-* integrated circuit products.  Any reproduction, modification, translation,
-* compilation, or representation of this Software except as specified
-* above is prohibited without the express written permission of Cypress.
-*
-* Disclaimer: THIS SOFTWARE IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT, IMPLIED
-* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. Cypress
-* reserves the right to make changes to the Software without notice. Cypress
-* does not assume any liability arising out of the application or use of the
-* Software or any product or circuit described in the Software. Cypress does
-* not authorize its products for use in any products where a malfunction or
-* failure of the Cypress product may reasonably be expected to result in
-* significant property damage, injury or death ("High Risk Product"). By
-* including Cypress's product in a High Risk Product, the manufacturer
-* of such system or application assumes all risk of such use and in doing
-* so agrees to indemnify Cypress against all liability.
+ * (c) 2024-2026, Infineon Technologies AG, or an affiliate of Infineon
+ * Technologies AG. All rights reserved.
+ * This software, associated documentation and materials ("Software") is
+ * owned by Infineon Technologies AG or one of its affiliates ("Infineon")
+ * and is protected by and subject to worldwide patent protection, worldwide
+ * copyright laws, and international treaty provisions. Therefore, you may use
+ * this Software only as provided in the license agreement accompanying the
+ * software package from which you obtained this Software. If no license
+ * agreement applies, then any use, reproduction, modification, translation, or
+ * compilation of this Software is prohibited without the express written
+ * permission of Infineon.
+ *
+ * Disclaimer: UNLESS OTHERWISE EXPRESSLY AGREED WITH INFINEON, THIS SOFTWARE
+ * IS PROVIDED AS-IS, WITH NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING, BUT NOT LIMITED TO, ALL WARRANTIES OF NON-INFRINGEMENT OF
+ * THIRD-PARTY RIGHTS AND IMPLIED WARRANTIES SUCH AS WARRANTIES OF FITNESS FOR A
+ * SPECIFIC USE/PURPOSE OR MERCHANTABILITY.
+ * Infineon reserves the right to make changes to the Software without notice.
+ * You are responsible for properly designing, programming, and testing the
+ * functionality and safety of your intended application of the Software, as
+ * well as complying with any legal requirements related to its use. Infineon
+ * does not guarantee that the Software will be free from intrusion, data theft
+ * or loss, or other breaches ("Security Breaches"), and Infineon shall have
+ * no liability arising out of any Security Breaches. Unless otherwise
+ * explicitly approved by Infineon, the Software may not be used in any
+ * application where a failure of the Product or any consequences of the use
+ * thereof can reasonably be expected to result in personal injury.
 *******************************************************************************/
 #include "cy_pdl.h"
 #include "cybsp.h"
@@ -55,10 +52,6 @@
 #define TEST_PPU_SUFFIX                   (2ul)
 #define TEST_PPU_FIXED                    (true)
 #define TEST_PPU_MASTER                   (true)
-
-/* Fault Assignment */
-#define CY_SYSFAULT_PERI_ECC 24
-#define CY_SYSFAULT_PERI_NC_ECC 25
 
 /*******************************************************************************
 * Global Variables
@@ -415,8 +408,8 @@ int main(void)
 
     /* Configure Fault report */
     Cy_SysFault_ClearStatus(FAULT_STRUCT0);
-    Cy_SysFault_SetMaskByIdx(FAULT_STRUCT0, (cy_en_SysFault_source_t)CY_SYSFAULT_PERI_ECC);
-    Cy_SysFault_SetMaskByIdx(FAULT_STRUCT0, (cy_en_SysFault_source_t)CY_SYSFAULT_PERI_NC_ECC);
+    Cy_SysFault_SetMaskByIdx(FAULT_STRUCT0, (cy_en_SysFault_source_t) PERI_PERI_C_ECC);
+    Cy_SysFault_SetMaskByIdx(FAULT_STRUCT0, (cy_en_SysFault_source_t) PERI_PERI_NC_ECC);
 
     /* Set user defined ATT value to the target registers */
     volatile PpuAttributePointerType att = get_Target_Att(TEST_PPU_SUFFIX, TEST_PPU_FIXED, TEST_PPU_MASTER);
@@ -487,7 +480,7 @@ int main(void)
     faultSource = Cy_SysFault_GetErrorSource(FAULT_STRUCT0);
 
     /* Expectation: correctable ECC error */
-    if (faultSource == (cy_en_SysFault_source_t)CY_SYSFAULT_PERI_ECC)
+    if (faultSource == (cy_en_SysFault_source_t) PERI_PERI_C_ECC)
     {
         printf("-->success\r\n");
     }
@@ -517,7 +510,7 @@ int main(void)
     faultSource = Cy_SysFault_GetErrorSource(FAULT_STRUCT0);
 
     /* Expectation: non-correctable ECC error */
-    if (faultSource == (cy_en_SysFault_source_t)CY_SYSFAULT_PERI_NC_ECC)
+    if (faultSource == (cy_en_SysFault_source_t) PERI_PERI_NC_ECC)
     {
         printf("-->success\r\n");
     }
